@@ -271,10 +271,23 @@
     color:var(--cream); letter-spacing:.01em;
   }
 
+  @media (max-width:1400px) and (min-width:961px){
+    .benefits-content{ gap:56px; }
+    .pill-row[data-shape="a"]{ --badge-w:196px; --badge-h:156.8px; --badge-gap:9px; }
+    .pill-row[data-shape="b"],
+    .pill-row[data-shape="c"]{ --badge-w:170px; --badge-h:170px; --badge-gap:16px; }
+    .pill-inner .pill-icon{ max-width:34px; max-height:34px; }
+    .pill-inner span{ font-size:17px; }
+  }
   @media (max-width:960px){
     .benefits-content{ gap:40px; padding:48px 28px; }
     .benefits-copy{ gap:40px; }
     .benefits-sub{ margin-top:12px; }
+    .pill-row[data-shape="a"]{ --badge-w:170px; --badge-h:136px; --badge-gap:8px; }
+    .pill-row[data-shape="b"],
+    .pill-row[data-shape="c"]{ --badge-w:150px; --badge-h:150px; --badge-gap:14px; }
+    .pill-inner .pill-icon{ max-width:30px; max-height:30px; }
+    .pill-inner span{ font-size:15px; }
   }
   @media (max-width:700px){
     /* Pinned scroll-jacking doesn't translate well to touch scroll — stack all
