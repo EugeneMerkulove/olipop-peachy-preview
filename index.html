@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OLIPOP — Soda, Finally Fixed.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @font-face{
+    font-family:'Tobias Trial';
+    src:url('assets/fonts/tobias/TobiasTRIAL-Regular.otf') format('opentype');
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Tobias Trial';
+    src:url('assets/fonts/tobias/TobiasTRIAL-Medium.otf') format('opentype');
+    font-weight:500; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Tobias Trial';
+    src:url('assets/fonts/tobias/TobiasTRIAL-SemiBold.otf') format('opentype');
+    font-weight:600; font-style:normal; font-display:swap;
+  }
+  @font-face{
+    font-family:'Tobias Trial';
+    src:url('assets/fonts/tobias/TobiasTRIAL-Bold.otf') format('opentype');
+    font-weight:700; font-style:normal; font-display:swap;
+  }
+  :root{
+    --cream:#FFF6EA;
+    --vanilla:#F3E4CD;
+    --yellow:#FCC100;
+    --mint:#98E1C3;
+    --jade:#008168;
+    --bottle:#034638;
+    --ink:#0B4B4B;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--cream);
+    font-family:'Bricolage Grotesque',sans-serif;
+    color:var(--ink);
+    overflow-x:hidden;
+  }
+  a{ text-decoration:none; color:inherit; }
+  button{ font-family:inherit; border:none; background:none; cursor:pointer; }
+
+  /* ───────────────────── EYEBROW ───────────────────── */
+  .eyebrow-bar{
+    background:var(--ink);
+    text-align:center;
+    padding:9px 16px;
+    font-size:13px; font-weight:600; letter-spacing:.01em;
+    color:var(--cream);
+  }
+
+  /* ───────────────────── HEADER ───────────────────── */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    background:var(--cream);
+  }
+  .header-inner{
+    max-width:1360px; margin:0 auto;
+    padding:18px 32px;
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    gap:24px;
+  }
+  .logo{ grid-column:2; justify-self:center; display:block; line-height:0; }
+  .logo img{ height:26px; width:auto; display:block; }
+  .main-nav{ grid-column:1; display:flex; gap:32px; justify-self:start; min-width:0; }
+  .main-nav a{
+    font-size:15px; font-weight:600; color:var(--ink);
+    position:relative; padding:4px 2px;
+  }
+  .main-nav a::after{
+    content:''; position:absolute; left:0; right:100%; bottom:0; height:2px;
+    background:var(--ink); transition:right 200ms ease-out;
+  }
+  .main-nav a:hover::after, .main-nav a:focus-visible::after{ right:0; }
+  .main-nav a:focus-visible{ outline:2px solid var(--ink); outline-offset:4px; border-radius:2px; }
+
+  .header-actions{ grid-column:3; display:flex; align-items:center; gap:22px; justify-self:end; min-width:0; }
+  .store-locator{ font-size:14px; font-weight:600; color:var(--ink); }
+  .store-locator:focus-visible{ outline:2px solid var(--ink); outline-offset:4px; border-radius:2px; }
+  .icon-btn{
+    position:relative; display:flex; align-items:center; justify-content:center;
+    width:32px; height:32px; color:var(--ink);
+    transition:transform 150ms ease-out;
+  }
+  .icon-btn:hover{ transform:translateY(-1px); }
+  .icon-btn:active{ transform:translateY(0) scale(.94); }
+  .icon-btn:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; border-radius:6px; }
+  .icon-btn svg{ width:20px; height:20px; }
+  .cart-count{
+    position:absolute; top:-4px; right:-6px;
+    background:var(--ink); color:var(--cream);
+    font-size:9px; font-weight:700; line-height:1;
+    width:15px; height:15px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  @media (max-width:860px){
+    .main-nav, .store-locator{ display:none; }
+    .header-inner{ padding:16px 20px; }
+  }
+
+  /* ───────────────────── PAGE SHELL / HERO ───────────────────── */
+  /* Fallback before JS trims it to 100vh minus the (now sibling, not parent) header's
+     own height — header moved outside .page-shell so it can stay sticky past hero. */
+  .page-shell{ display:flex; flex-direction:column; min-height:100vh; min-height:100svh; }
+  .hero{ flex:1; min-height:0; padding:24px; display:flex; }
+  .hero-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; flex:1; min-height:0; }
+  .panel{ min-width:0; min-height:0; border-radius:24px; overflow:hidden; position:relative; }
+
+  .panel-pour{ background:var(--vanilla); }
+  .pour-frame{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:center;
+    opacity:0;
+  }
+  .pour-frame.is-active{ opacity:1; }
+  .pour-noise{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; opacity:.6;
+    filter:contrast(2.2) brightness(.85);
+    pointer-events:none;
+  }
+
+  .panel-content{
+    background-image:url('assets/imgs/bkgr.png'); background-size:cover; background-position:center;
+    padding:64px; display:flex; flex-direction:column; justify-content:center;
+  }
+  .hero-headline{
+    font-family:'Tobias Trial',serif; font-weight:500;
+    font-size:clamp(44px, 8.5vw, 132px); line-height:.98; letter-spacing:-0.02em;
+    color:var(--ink); margin:0 0 24px; max-width:560px;
+  }
+  .hero-body{
+    font-family:'Bricolage Grotesque',sans-serif; font-size:17px; line-height:1.7;
+    color:#393736; max-width:480px; margin:0 0 32px;
+  }
+  .hero-cta-row{ display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+  .btn-primary{
+    background:var(--ink); color:var(--cream);
+    font-weight:600; font-size:16px; padding:16px 32px; border-radius:9999px;
+    box-shadow:0 4px 14px rgba(11,75,75,.28);
+    transition:transform 200ms ease-out, box-shadow 200ms ease-out;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(11,75,75,.32); }
+  .btn-primary:active{ transform:translateY(0) scale(.97); }
+  .btn-primary:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+  .btn-link{
+    font-weight:600; font-size:15px; color:var(--ink);
+    text-decoration:underline; text-underline-offset:4px;
+    transition:opacity 150ms ease-out;
+  }
+  .btn-link:hover{ opacity:.65; }
+  .btn-link:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; border-radius:2px; }
+
+  /* ───────────────────── BADGE ───────────────────── */
+  .badge-stage{ position:absolute; top:32px; right:32px; width:180px; height:180px; }
+  .badge-layer{ position:absolute; inset:0; opacity:0; z-index:0; }
+  .badge-layer.is-back{ opacity:.92; z-index:1; }
+  .badge-layer.is-front{ opacity:1; z-index:2; animation:stamp-in 520ms cubic-bezier(.34,1.56,.64,1); }
+  .badge-shape{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+    animation:badge-spin 19s linear infinite;
+  }
+  .badge-layer:nth-child(1) .badge-shape{ animation-delay:0s; }
+  .badge-layer:nth-child(2) .badge-shape{ animation-delay:-6.3s; }
+  .badge-layer:nth-child(3) .badge-shape{ animation-delay:-12.6s; }
+  .badge-text{
+    position:absolute; inset:0; z-index:1;
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    text-align:center; font-family:'Tobias Trial',serif; font-size:23px; line-height:1.12; font-weight:600;
+    opacity:0; transition:opacity 150ms linear;
+  }
+  .badge-layer.is-front .badge-text{ opacity:1; }
+  .badge-layer[data-state="0"] .badge-text{ color:var(--ink); }
+  .badge-layer[data-state="1"] .badge-text{ color:var(--cream); }
+  .badge-layer[data-state="2"] .badge-text{ color:#000000; }
+
+  @keyframes badge-spin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+  @keyframes stamp-in{
+    0%{ transform:scale(1.4) rotate(-8deg); opacity:0; }
+    60%{ transform:scale(.94) rotate(3deg); opacity:1; }
+    100%{ transform:scale(1) rotate(0deg); opacity:1; }
+  }
+
+  @media (max-width:860px){
+    .hero{ padding:16px; }
+    .hero-grid{ grid-template-columns:1fr; }
+    .panel-pour{ height:44vh; min-height:300px; }
+    .panel-content{ padding:36px 24px; min-height:440px; }
+    .badge-stage{ width:134px; height:134px; top:20px; right:20px; }
+    .hero-body{ font-size:16px; }
+  }
+
+  /* Narrow two-column window (just above the stacking breakpoint): panels are
+     too tight for the badge to sit beside the headline without colliding, so
+     reserve clearance above it instead of letting them overlap. */
+  @media (min-width:861px) and (max-width:970px){
+    .hero-headline{ margin-top:190px; }
+  }
+
+  /* ───────────────────── BENEFITS (pinned scroll) ───────────────────── */
+  .benefits-pin-wrapper{ position:relative; height:300vh; }
+  .benefits{ position:sticky; padding:0 24px 24px; height:100vh; display:flex; }
+  .benefits-card{
+    position:relative; border-radius:24px; overflow:hidden;
+    flex:1; display:flex;
+  }
+  .benefits-bg{ position:absolute; inset:0; }
+  .benefits-video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; filter:blur(7px) saturate(1.05);
+  }
+  .benefits-overlay{ position:absolute; inset:0; background:rgba(0,0,0,.38); }
+  .benefits-noise{
+    position:absolute; inset:0; background:url('assets/imgs/benefits-noise.png');
+    background-size:300px; opacity:.06; pointer-events:none;
+  }
+  .benefits-content{
+    position:absolute; inset:0; z-index:1;
+    display:flex; align-items:center; justify-content:center; gap:96px;
+    padding:64px 48px; flex-wrap:wrap;
+    opacity:0; transition:opacity 500ms ease-in-out;
+  }
+  .benefits-content.is-active{ opacity:1; }
+  .benefits-can{ flex:0 0 auto; }
+  .benefits-can img{ display:block; width:auto; max-width:100%; }
+  .benefits-copy{ flex:1 1 480px; max-width:816px; display:flex; flex-direction:column; gap:72px; }
+  .benefits-stat-row{ display:flex; align-items:baseline; gap:16px; }
+  .benefits-stat{
+    font-family:'Tobias Trial',serif; font-weight:500; color:var(--cream);
+    font-size:124px; line-height:1; letter-spacing:.01em; margin:0;
+  }
+  .benefits-stat-unit{
+    font-family:'Tobias Trial',serif; font-weight:500; color:var(--cream);
+    font-size:30px; letter-spacing:.01em;
+  }
+  .benefits-sub{
+    font-family:'Tobias Trial',serif; font-weight:500; color:var(--cream);
+    font-size:clamp(28px, 4.2vw, 72px); line-height:1.15; letter-spacing:.01em; margin:16px 0 0;
+  }
+  .benefits-pills{ display:flex; flex-direction:column; gap:12px; }
+  .pill-row{ display:flex; flex-wrap:wrap; gap:var(--badge-gap, 24px); }
+  .pill-row[data-shape="a"]{ --badge-w:264px; --badge-h:211.2px; --badge-gap:12px; }
+  .pill-row[data-shape="b"],
+  .pill-row[data-shape="c"]{ --badge-w:212px; --badge-h:212px; --badge-gap:24px; }
+
+  .pill-card{
+    position:relative; flex:0 0 auto; width:var(--badge-w); height:var(--badge-h);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pill-card .pill-shape{
+    position:absolute; inset:0; width:100%; height:100%; display:block;
+    filter:drop-shadow(0 14px 26px rgba(3,70,56,.32));
+  }
+  .pill-inner{
+    position:relative; z-index:1; display:flex; flex-direction:column; align-items:center;
+    gap:14px; text-align:center; padding:0 22px;
+  }
+  .pill-inner .pill-icon{ max-width:42px; max-height:42px; width:auto; height:auto; display:block; }
+  .pill-inner span{
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:400; font-size:20px; line-height:1.3;
+    color:var(--cream); letter-spacing:.01em;
+  }
+
+  @media (max-width:960px){
+    .benefits-content{ gap:40px; padding:48px 28px; }
+    .benefits-copy{ gap:40px; }
+    .benefits-sub{ margin-top:12px; }
+  }
+  @media (max-width:700px){
+    /* Pinned scroll-jacking doesn't translate well to touch scroll — stack all
+       three panels as normal static cards instead of gating one at a time. */
+    .benefits-pin-wrapper{ height:auto; display:flex; flex-direction:column; gap:24px; padding:0 24px 24px; }
+    .benefits{ position:relative; height:auto; padding:0; flex:none; }
+    .benefits-card{ min-height:0; flex-direction:column; }
+    .benefits-content{ position:relative; opacity:1; transition:none; flex-direction:column; padding:40px 24px; }
+    .benefits-can{ width:min(220px, 55vw); align-items:stretch; }
+    .benefits-can img{ height:auto; width:100%; }
+    .pill-row{ justify-content:center; }
+    .pill-row[data-shape="a"]{ --badge-w:90px; --badge-h:72px; --badge-gap:8px; }
+    .pill-row[data-shape="b"],
+    .pill-row[data-shape="c"]{ --badge-w:90px; --badge-h:90px; --badge-gap:8px; }
+    .pill-inner{ gap:5px; padding:0 8px; }
+    .pill-inner .pill-icon{ max-width:20px; max-height:20px; }
+    .pill-inner span{ font-size:11px; line-height:1.2; }
+  }
+
+  /* ───────────────────── BUY BOX ───────────────────── */
+  .buybox{ padding:24px; background:var(--cream); }
+  .buybox-grid{
+    max-width:1360px; margin:0 auto;
+    display:grid; grid-template-columns:1fr 1fr; gap:64px;
+    padding:64px 24px;
+  }
+  .buybox-visual-panel{
+    background:var(--vanilla); border-radius:24px;
+    aspect-ratio:1/1; position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .buybox-can-shadow{
+    position:absolute; bottom:12%; left:50%; transform:translateX(-50%);
+    width:44%; height:8%; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(11,75,75,.30), rgba(11,75,75,0) 70%);
+    filter:blur(2px);
+  }
+  .buybox-can-img{
+    position:relative; height:72%; width:auto;
+    object-fit:contain;
+    filter:drop-shadow(0 20px 26px rgba(11,75,75,.25));
+    transition:opacity 200ms ease-out;
+  }
+  .buybox-features{
+    display:flex; gap:20px; flex-wrap:wrap; justify-content:center;
+    margin-top:28px;
+  }
+  .feature{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    text-align:center; width:96px;
+  }
+  .feature img{ width:28px; height:28px; }
+  .feature span{
+    font-family:'Bricolage Grotesque',sans-serif; font-size:12px; font-weight:600;
+    color:var(--ink); line-height:1.3;
+  }
+
+  .buybox-info{ display:flex; flex-direction:column; }
+  .buybox-rating{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .buybox-rating .stars{ color:var(--yellow); font-size:15px; letter-spacing:1px; }
+  .buybox-rating span{ font-family:'Bricolage Grotesque',sans-serif; font-size:13px; color:rgba(11,75,75,.6); }
+  .buybox-name{
+    font-family:'Tobias Trial',serif; font-weight:600; font-size:38px;
+    color:var(--ink); margin:0 0 6px; letter-spacing:-0.01em;
+  }
+  .buybox-tagline{ font-family:'Bricolage Grotesque',sans-serif; font-size:14px; color:rgba(11,75,75,.6); margin:0 0 32px; }
+  .buybox-label{
+    font-family:'Bricolage Grotesque',sans-serif; font-size:11px; font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase; color:rgba(11,75,75,.55);
+    margin-bottom:14px;
+  }
+
+  .flavor-swatches{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:32px; }
+  .swatch{
+    width:44px; height:44px; border-radius:50%; padding:0;
+    background-size:220%; background-position:center 30%;
+    border:2.5px solid transparent; cursor:pointer;
+    transition:transform 150ms ease-out, border-color 150ms ease-out;
+  }
+  .swatch:hover{ transform:translateY(-2px); }
+  .swatch.is-active{ border-color:var(--ink); }
+  .swatch:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+  .swatch-more{
+    display:flex; align-items:center; justify-content:center;
+    background-image:none !important; background:var(--vanilla);
+    border:2px dashed rgba(11,75,75,.35);
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:12px;
+    color:var(--ink); text-decoration:none;
+  }
+  .swatch-more:hover{ background:rgba(11,75,75,.08); border-color:var(--ink); transform:translateY(-2px); }
+
+  .purchase-options{ display:flex; flex-direction:column; gap:12px; margin-bottom:28px; }
+  .purchase-card{
+    display:block; width:100%; text-align:left; font-family:inherit;
+    background:var(--cream); border:1.5px solid rgba(11,75,75,.18); border-radius:16px;
+    padding:18px 20px; cursor:pointer;
+    transition:border-color 150ms ease-out, background-color 150ms ease-out;
+  }
+  .purchase-card.is-active{ background:rgba(152,225,195,.22); border-color:var(--ink); }
+  .purchase-card:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .purchase-card-top{ display:flex; align-items:center; gap:12px; margin-bottom:4px; }
+  .purchase-radio{
+    width:18px; height:18px; border-radius:50%; flex:0 0 auto;
+    border:2px solid rgba(11,75,75,.35); position:relative;
+  }
+  .purchase-card.is-active .purchase-radio{ border-color:var(--ink); }
+  .purchase-card.is-active .purchase-radio::after{
+    content:''; position:absolute; inset:3px; border-radius:50%; background:var(--ink);
+  }
+  .purchase-title{ font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:15px; color:var(--ink); }
+  .save-badge{
+    background:var(--jade); color:var(--cream); font-size:10px; font-weight:700;
+    padding:3px 9px; border-radius:9999px; letter-spacing:.03em;
+  }
+  .purchase-price-row{ display:flex; align-items:baseline; gap:8px; margin:0 0 4px 30px; }
+  .price-strike{ font-family:'Bricolage Grotesque',sans-serif; font-size:14px; color:rgba(11,75,75,.4); text-decoration:line-through; }
+  .price-now{ font-family:'Tobias Trial',serif; font-weight:600; font-size:20px; color:var(--ink); }
+  .price-unit{ font-family:'Bricolage Grotesque',sans-serif; font-size:12px; color:rgba(11,75,75,.5); }
+  .frequency-select{
+    margin:8px 0 10px 30px; padding:9px 12px; font-family:'Bricolage Grotesque',sans-serif;
+    font-size:13px; font-weight:600; color:var(--ink);
+    background:var(--cream); border:1.5px solid rgba(11,75,75,.2); border-radius:8px;
+    cursor:pointer;
+  }
+  .frequency-select:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .purchase-perks{ margin-left:30px; display:flex; flex-direction:column; gap:4px; }
+  .purchase-perks span{ font-family:'Bricolage Grotesque',sans-serif; font-size:12px; color:rgba(11,75,75,.65); }
+
+  .qty-cart-row{ margin-bottom:20px; }
+  .qty-stepper{
+    display:inline-flex; align-items:center; background:var(--vanilla);
+    border-radius:9999px; overflow:hidden;
+  }
+  .qty-btn{
+    width:44px; height:44px; font-size:18px; font-weight:600; color:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    transition:background-color 150ms ease-out;
+  }
+  .qty-btn:hover{ background:rgba(11,75,75,.08); }
+  .qty-btn:focus-visible{ outline:2px solid var(--ink); outline-offset:-2px; }
+  .qty-num{ width:40px; text-align:center; font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:15px; color:var(--ink); }
+
+  .btn-cart{
+    width:100%; padding:18px; background:var(--ink); color:var(--cream);
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:16px;
+    border-radius:9999px; letter-spacing:.01em;
+    box-shadow:0 4px 14px rgba(11,75,75,.25);
+    transition:transform 200ms ease-out, box-shadow 200ms ease-out;
+    margin-bottom:20px;
+  }
+  .btn-cart:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(11,75,75,.3); }
+  .btn-cart:active{ transform:translateY(0) scale(.98); }
+  .btn-cart:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+
+  .buybox-trust{ display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+  .buybox-trust span{
+    display:flex; align-items:center; gap:6px;
+    font-family:'Bricolage Grotesque',sans-serif; font-size:12px; color:rgba(11,75,75,.55);
+  }
+  .buybox-trust svg{ width:16px; height:16px; flex:0 0 auto; }
+
+  @media (max-width:860px){
+    .buybox-grid{ grid-template-columns:1fr; gap:36px; padding:40px 20px; }
+    .buybox-name{ font-size:32px; }
+  }
+
+  /* ───────────────────── YMAL ───────────────────── */
+  .ymal{ padding:80px 0 96px; background:var(--cream); overflow:hidden; }
+  .ymal-header{
+    max-width:1360px; margin:0 auto 40px; padding:0 24px;
+    display:flex; align-items:baseline; justify-content:space-between; gap:24px; flex-wrap:wrap;
+  }
+  .ymal-title{ font-family:'Tobias Trial',serif; font-weight:600; font-size:clamp(28px,3.4vw,44px); color:var(--ink); margin:0; letter-spacing:-0.01em; }
+  .ymal-shopall{
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:14px; color:var(--ink);
+    text-decoration:underline; text-underline-offset:4px; white-space:nowrap;
+    transition:opacity 150ms ease-out;
+  }
+  .ymal-shopall:hover{ opacity:.65; }
+  .ymal-shopall:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; border-radius:2px; }
+
+  .ymal-track-wrap{ width:100%; }
+  .ymal-track{
+    display:flex; gap:20px; width:max-content;
+    animation:ymal-scroll 42s linear infinite;
+  }
+  .ymal-track-wrap:hover .ymal-track,
+  .ymal-track.is-paused{ animation-play-state:paused; }
+  @keyframes ymal-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+
+  .ymal-card{
+    position:relative; flex:0 0 auto; width:280px; height:380px;
+    border-radius:24px; overflow:hidden; padding:28px;
+    display:flex; flex-direction:column; justify-content:flex-end;
+  }
+  .ymal-card-can{
+    position:absolute; top:28px; left:50%; transform:translateX(-50%);
+    height:190px; width:auto;
+    filter:drop-shadow(0 16px 20px rgba(11,75,75,.22));
+  }
+  .ymal-card-name{ font-family:'Tobias Trial',serif; font-weight:600; font-size:21px; color:var(--ink); margin:0 0 6px; position:relative; }
+  .ymal-card-desc{ font-family:'Bricolage Grotesque',sans-serif; font-size:13px; line-height:1.55; color:rgba(11,75,75,.7); margin:0 0 16px; position:relative; }
+  .ymal-card-cta{ display:flex; align-items:center; justify-content:space-between; position:relative; }
+  .ymal-card-price{ font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:15px; color:var(--ink); }
+  .ymal-add{
+    width:36px; height:36px; border-radius:50%; background:var(--ink); color:var(--cream);
+    font-size:20px; line-height:1; display:flex; align-items:center; justify-content:center;
+    transition:transform 150ms ease-out;
+  }
+  .ymal-add:hover{ transform:scale(1.08); }
+  .ymal-add:active{ transform:scale(.94); }
+  .ymal-add:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  @media (max-width:640px){
+    .ymal-card{ width:220px; height:320px; padding:20px; }
+    .ymal-card-can{ height:140px; top:20px; }
+  }
+
+  /* ───────────────────── FOOTER ───────────────────── */
+  .site-footer{ background:var(--ink); color:var(--cream); padding:72px 24px 32px; }
+  .footer-grid{
+    max-width:1360px; margin:0 auto 56px;
+    display:grid; grid-template-columns:1.9fr 1fr 1fr 1fr; gap:48px;
+  }
+  .footer-brand-col{ display:flex; flex-direction:column; gap:24px; }
+  .footer-newsletter-title{
+    font-family:'Tobias Trial',serif; font-weight:700; font-size:clamp(28px,3vw,38px);
+    line-height:1.18; color:var(--cream); margin:0; letter-spacing:-0.01em;
+  }
+  .footer-newsletter-form{ display:flex; gap:12px; max-width:560px; flex-wrap:wrap; }
+  .footer-email-input{
+    flex:1 1 260px; padding:16px 22px; border-radius:9999px; border:none;
+    font-family:'Bricolage Grotesque',sans-serif; font-size:15px; color:var(--ink);
+    background:var(--cream);
+  }
+  .footer-email-input::placeholder{ color:rgba(11,75,75,.45); }
+  .footer-email-input:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; }
+  .footer-subscribe-btn{
+    flex:0 0 auto; padding:16px 32px; border-radius:9999px; border:none;
+    background:var(--yellow); color:var(--ink);
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:15px; cursor:pointer;
+    transition:transform 150ms ease-out;
+  }
+  .footer-subscribe-btn:hover{ transform:translateY(-2px); }
+  .footer-subscribe-btn:active{ transform:translateY(0) scale(.97); }
+  .footer-subscribe-btn:focus-visible{ outline:2px solid var(--cream); outline-offset:3px; }
+  .footer-social{ display:flex; gap:12px; }
+  .footer-social a{
+    width:36px; height:36px; border-radius:50%; border:1.5px solid rgba(255,246,234,.25);
+    display:flex; align-items:center; justify-content:center; color:var(--cream);
+    transition:background-color 150ms ease-out, border-color 150ms ease-out;
+  }
+  .footer-social a:hover{ background:rgba(255,246,234,.1); border-color:rgba(255,246,234,.5); }
+  .footer-social a:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; }
+  .footer-social svg{ width:17px; height:17px; }
+
+  .footer-col-title{
+    font-family:'Bricolage Grotesque',sans-serif; font-size:12px; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase; color:rgba(255,246,234,.5); margin-bottom:18px;
+  }
+  .footer-links{ display:flex; flex-direction:column; gap:12px; }
+  .footer-links a{
+    font-family:'Bricolage Grotesque',sans-serif; font-size:14px; color:rgba(255,246,234,.85);
+    transition:opacity 150ms ease-out;
+  }
+  .footer-links a:hover{ opacity:.65; }
+  .footer-links a:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; border-radius:2px; }
+
+  .footer-bottom{
+    max-width:1360px; margin:0 auto; padding-top:28px;
+    border-top:1px solid rgba(255,246,234,.14);
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .footer-copyright{ font-family:'Bricolage Grotesque',sans-serif; font-size:13px; color:rgba(255,246,234,.5); }
+  .footer-legal{ display:flex; gap:24px; }
+  .footer-legal a{ font-family:'Bricolage Grotesque',sans-serif; font-size:13px; color:rgba(255,246,234,.5); transition:opacity 150ms ease-out; }
+  .footer-legal a:hover{ opacity:.7; }
+  .footer-legal a:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; border-radius:2px; }
+
+  @media (max-width:800px){
+    .footer-grid{ grid-template-columns:1fr 1fr; gap:36px 24px; }
+    .footer-brand-col{ grid-column:1 / -1; }
+    .footer-bottom{ flex-direction:column; align-items:flex-start; }
+  }
+
+  /* ───────────────────── MOTION SAFETY ───────────────────── */
+  @media (prefers-reduced-motion: reduce){
+    .pour-frame, .badge-shape, .badge-layer, .benefits-content, .ymal-track{ animation:none !important; transition:none !important; }
+    .icon-btn, .swatch, .purchase-card, .qty-btn, .btn-cart, .ymal-add, .footer-social a{ transition:none !important; }
+    .quiz-modal, .quiz-overlay, .quiz-chip, .quiz-reopen, .quiz-submit, .quiz-check-mark{ animation:none !important; transition:none !important; }
+  }
+
+  /* ───────────────────── FLAVOR QUIZ POPUP ───────────────────── */
+  .quiz-overlay{
+    position:fixed; inset:0; z-index:200;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    opacity:0; visibility:hidden;
+    transition:opacity 300ms ease-out, visibility 0s linear 300ms;
+  }
+  .quiz-overlay.is-open{ opacity:1; visibility:visible; transition:opacity 300ms ease-out; }
+  .quiz-backdrop{
+    position:absolute; inset:0;
+    background:rgba(3,70,56,.5);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .quiz-modal{
+    position:relative; width:100%; max-width:460px; max-height:calc(100vh - 48px);
+    overflow-y:auto;
+    background:var(--cream);
+    border-radius:24px;
+    box-shadow:0 24px 48px rgba(3,70,56,.24), 0 8px 16px rgba(3,70,56,.14);
+    padding:44px 40px 36px;
+    transform:translateY(18px) scale(.98);
+    transition:transform 320ms cubic-bezier(.2,.8,.3,1.1);
+  }
+  .quiz-overlay.is-open .quiz-modal{ transform:translateY(0) scale(1); }
+  .quiz-close{
+    position:absolute; top:16px; right:16px;
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink); background:rgba(3,70,56,.06);
+    transition:transform 150ms ease-out, background 150ms ease-out;
+  }
+  .quiz-close:hover{ background:rgba(3,70,56,.12); transform:rotate(90deg); }
+  .quiz-close:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .quiz-close svg{ width:14px; height:14px; }
+
+  .quiz-step{ display:none; }
+  .quiz-step.is-active{ display:block; }
+
+  .quiz-eyebrow{
+    font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--jade); margin:0 0 10px; text-align:center;
+  }
+  .quiz-title{
+    font-family:'Tobias Trial',serif; font-weight:600; font-size:30px; line-height:1.1;
+    letter-spacing:-0.02em; color:var(--ink); margin:0 0 10px; text-align:center;
+  }
+  .quiz-sub{
+    font-size:15px; line-height:1.55; color:rgba(11,75,75,.65);
+    margin:0 0 28px; text-align:center;
+  }
+
+  .quiz-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:10px 8px;
+    margin-bottom:18px;
+  }
+  .quiz-chip{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:10px 4px 12px; border-radius:16px;
+    background:var(--vanilla); border:2px solid transparent;
+    cursor:pointer;
+    transition:transform 150ms ease-out, border-color 150ms ease-out, background 150ms ease-out;
+  }
+  .quiz-chip:hover{ transform:translateY(-3px); background:#ECDBC0; }
+  .quiz-chip:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .quiz-chip.is-selected{ border-color:var(--jade); background:var(--mint); }
+  .quiz-chip img{ width:34px; height:auto; filter:drop-shadow(0 6px 10px rgba(3,70,56,.18)); }
+  .quiz-chip span{
+    font-size:10.5px; font-weight:700; line-height:1.2; text-align:center;
+    color:var(--ink); letter-spacing:-0.01em;
+  }
+  .quiz-surprise{
+    display:block; width:100%; text-align:center;
+    font-size:13px; font-weight:600; color:var(--jade);
+    padding:6px; border-radius:8px;
+    transition:color 150ms ease-out;
+  }
+  .quiz-surprise:hover, .quiz-surprise:focus-visible{ color:var(--ink); text-decoration:underline; }
+  .quiz-surprise:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+
+  .quiz-offer-can{ display:flex; justify-content:center; margin:-8px 0 14px; }
+  .quiz-offer-can img{
+    height:120px; width:auto;
+    filter:drop-shadow(0 20px 28px rgba(3,70,56,.28));
+  }
+  .quiz-form{ display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .quiz-input{
+    width:100%; padding:14px 16px; border-radius:12px;
+    border:1.5px solid rgba(3,70,56,.18); background:var(--white, #fff);
+    font-family:'Bricolage Grotesque',sans-serif; font-size:15px; color:var(--ink);
+    transition:border-color 150ms ease-out;
+  }
+  .quiz-input::placeholder{ color:rgba(11,75,75,.4); }
+  .quiz-input:focus{ outline:none; border-color:var(--jade); }
+  .quiz-input:focus-visible{ outline:2px solid var(--jade); outline-offset:2px; }
+  .quiz-input:invalid:not(:placeholder-shown){ border-color:#C0392B; }
+  .quiz-submit{
+    width:100%; padding:15px; border-radius:12px;
+    background:var(--yellow); color:var(--ink);
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:15px;
+    box-shadow:0 4px 12px rgba(3,70,56,.14);
+    transition:transform 150ms ease-out, box-shadow 150ms ease-out;
+  }
+  .quiz-submit:hover{ transform:translateY(-2px); box-shadow:0 8px 18px rgba(3,70,56,.2); }
+  .quiz-submit:active{ transform:translateY(0) scale(.98); }
+  .quiz-submit:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .quiz-submit:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+  .quiz-fineprint{ font-size:11.5px; line-height:1.5; color:rgba(11,75,75,.45); text-align:center; margin:0; }
+
+  .quiz-check{
+    width:52px; height:52px; border-radius:50%; margin:0 auto 18px;
+    background:var(--mint); display:flex; align-items:center; justify-content:center;
+  }
+  .quiz-check svg{ width:24px; height:24px; color:var(--bottle); }
+  .quiz-code{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--vanilla); border:1.5px dashed rgba(3,70,56,.3);
+    border-radius:12px; padding:14px 16px; margin:0 0 20px;
+  }
+  .quiz-code span{
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:17px;
+    letter-spacing:.06em; color:var(--ink);
+  }
+  .quiz-code button{
+    font-size:12px; font-weight:700; color:var(--jade);
+    padding:6px 10px; border-radius:8px; background:rgba(3,70,56,.06);
+    transition:background 150ms ease-out;
+  }
+  .quiz-code button:hover{ background:rgba(3,70,56,.12); }
+  .quiz-code button:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+  .quiz-done{
+    width:100%; padding:15px; border-radius:12px;
+    background:var(--bottle); color:var(--cream);
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:15px;
+    transition:transform 150ms ease-out;
+  }
+  .quiz-done:hover{ transform:translateY(-2px); }
+  .quiz-done:active{ transform:translateY(0) scale(.98); }
+  .quiz-done:focus-visible{ outline:2px solid var(--cream); outline-offset:2px; }
+
+  @keyframes reopen-bounce{
+    0%, 78%, 100%{ transform:translateY(0); }
+    83%{ transform:translateY(-11px); }
+    88%{ transform:translateY(0); }
+    92%{ transform:translateY(-5px); }
+    96%{ transform:translateY(0); }
+  }
+  .quiz-reopen{
+    position:fixed; left:20px; bottom:20px; z-index:190;
+    display:flex; align-items:center; gap:8px;
+    background:var(--bottle); color:var(--cream);
+    padding:13px 20px 13px 16px; border-radius:9999px;
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:13px;
+    box-shadow:0 12px 32px rgba(3,70,56,.28), 0 4px 8px rgba(3,70,56,.12);
+    transform:translateY(0);
+    transition:transform 150ms ease-out, box-shadow 150ms ease-out;
+    animation:reopen-bounce 4.5s ease-in-out infinite;
+  }
+  .quiz-reopen[hidden]{ display:none; }
+  .quiz-reopen:hover{ transform:translateY(-3px); box-shadow:0 16px 36px rgba(3,70,56,.32), 0 4px 8px rgba(3,70,56,.14); animation-play-state:paused; }
+  .quiz-reopen:focus-visible{ outline:2px solid var(--mint); outline-offset:3px; }
+  .quiz-reopen svg{ width:16px; height:16px; color:var(--yellow); flex-shrink:0; }
+
+  @media (max-width:480px){
+    .quiz-modal{ padding:36px 24px 28px; }
+    .quiz-grid{ grid-template-columns:repeat(3, 1fr); }
+    .quiz-title{ font-size:26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="eyebrow-bar">$3.99 flat rate shipping &middot; Orders $50+ ship FREE</div>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <nav class="main-nav">
+      <a href="#">Shop</a>
+      <a href="#">Learn</a>
+      <a href="#">Subscribe</a>
+    </nav>
+    <a class="logo" href="#"><img src="assets/imgs/OlipopLogo_1.webp" alt="OLIPOP"></a>
+    <div class="header-actions">
+      <a class="store-locator" href="#">Store Locator</a>
+      <button class="icon-btn" aria-label="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1.2 11.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+        <span class="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page-shell">
+
+  <section class="hero">
+    <div class="hero-grid">
+
+      <div class="panel panel-pour">
+        <img class="pour-frame is-active" src="assets/imgs/frame_0089.jpg" alt="OLIPOP pouring">
+        <img class="pour-frame" src="assets/imgs/frame_0101.jpg" alt="">
+        <img class="pour-frame" src="assets/imgs/frame_0107.jpg" alt="">
+        <img class="pour-frame" src="assets/imgs/frame_0113.jpg" alt="">
+        <img class="pour-frame" src="assets/imgs/frame_0119.jpg" alt="">
+        <img class="pour-frame" src="assets/imgs/frame_0125.jpg" alt="">
+        <img class="pour-frame" src="assets/imgs/frame_0138.jpg" alt="">
+        <img class="pour-noise" src="assets/imgs/Noise.png" alt="">
+      </div>
+
+      <div class="panel panel-content">
+        <div class="badge-stage" id="badgeStage">
+          <div class="badge-layer" data-state="0">
+            <img class="badge-shape" src="assets/imgs/image.png" alt="">
+            <span class="badge-text">9g<br>fiber</span>
+          </div>
+          <div class="badge-layer" data-state="1">
+            <img class="badge-shape" src="assets/imgs/image2.png" alt="">
+            <span class="badge-text">2g<br>sugar</span>
+          </div>
+          <div class="badge-layer" data-state="2">
+            <img class="badge-shape" src="assets/imgs/image3.png" alt="">
+            <span class="badge-text">35<br>calories</span>
+          </div>
+        </div>
+
+        <h1 class="hero-headline">Soda,<br>finally<br>fixed</h1>
+        <p class="hero-body">All the soda you love, none of the stuff you don't.<br>Plant-based prebiotics, real botanicals, backed by science.</p>
+        <div class="hero-cta-row">
+          <button class="btn-primary">Shop Now</button>
+          <a class="btn-link" href="#">Explore 20+ flavors</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<div class="benefits-pin-wrapper" id="benefitsPinWrapper">
+  <section class="benefits" id="benefitsPin">
+    <div class="benefits-card">
+      <div class="benefits-bg" aria-hidden="true">
+        <video class="benefits-video" src="assets/video/benefits-bg-2.mp4" autoplay loop muted playsinline></video>
+      </div>
+      <div class="benefits-overlay" aria-hidden="true"></div>
+      <div class="benefits-noise" aria-hidden="true"></div>
+
+      <div class="benefits-content is-active" data-panel="0">
+        <div class="benefits-can">
+          <img src="assets/imgs/benefits-cherry-cola.png" alt="OLIPOP Cherry Cola can">
+        </div>
+        <div class="benefits-copy">
+          <div>
+            <p class="benefits-stat">9g</p>
+            <p class="benefits-sub">Fiber that actually<br>feeds your gut</p>
+          </div>
+          <div class="benefits-pills">
+            <div class="pill-row" data-shape="a">
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p0-green.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/leaf.svg" alt=""><span>Natural Flavors</span></div>
+              </div>
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p0-blue.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/kidney.svg" alt=""><span>Prebiotic Fiber</span></div>
+              </div>
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p0-orange.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/plant.svg" alt=""><span>Plant Botanicals</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="benefits-content" data-panel="1">
+        <div class="benefits-can">
+          <img src="assets/imgs/benefits-cream-soda.png" alt="OLIPOP Cream Soda can">
+        </div>
+        <div class="benefits-copy">
+          <div>
+            <div class="benefits-stat-row"><p class="benefits-stat">20+</p><span class="benefits-stat-unit">botanicals</span></div>
+            <p class="benefits-sub">Plants,<br>not a chemistry lab</p>
+          </div>
+          <div class="benefits-pills">
+            <div class="pill-row" data-shape="b">
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p1-blue.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/sweet.svg" alt=""><span>No Artificial<br>Sweeteners</span></div>
+              </div>
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p1-green.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/pill.svg" alt=""><span>Non-GMO</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="benefits-content" data-panel="2">
+        <div class="benefits-can">
+          <img src="assets/imgs/benefits-crisp-apple.png" alt="OLIPOP Crisp Apple can">
+        </div>
+        <div class="benefits-copy">
+          <div>
+            <div class="benefits-stat-row"><p class="benefits-stat">2g</p><span class="benefits-stat-unit">sugar</span></div>
+            <p class="benefits-sub">The ritual,<br>without the regret</p>
+          </div>
+          <div class="benefits-pills">
+            <div class="pill-row" data-shape="c">
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p2-orange.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/cookie.svg" alt=""><span>35&ndash;45 calories</span></div>
+              </div>
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p2-blue-b.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/DNA.svg" alt=""><span>Science-backed</span></div>
+              </div>
+              <div class="pill-card">
+                <img class="pill-shape" src="assets/icons/badges/badge-p2-green.svg" alt="">
+                <div class="pill-inner"><img class="pill-icon" src="assets/imgs/grass.svg" alt=""><span>20+ Flavors</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<section class="buybox">
+  <div class="buybox-grid">
+
+    <div class="buybox-media">
+      <div class="buybox-visual-panel">
+        <div class="buybox-can-shadow" aria-hidden="true"></div>
+        <img class="buybox-can-img" id="buyboxCanImg" src="assets/imgs/cream-soda.webp" alt="OLIPOP Cream Soda can">
+      </div>
+      <div class="buybox-features">
+        <div class="feature"><img src="assets/icons/kidney-ink.svg" alt=""><span>Prebiotic Fiber</span></div>
+        <div class="feature"><img src="assets/icons/plant-ink.svg" alt=""><span>Plant-Based</span></div>
+        <div class="feature"><img src="assets/icons/leaf-ink.svg" alt=""><span>Natural Flavors</span></div>
+        <div class="feature"><img src="assets/icons/pill-ink.svg" alt=""><span>Non-GMO</span></div>
+      </div>
+    </div>
+
+    <div class="buybox-info">
+      <div class="buybox-rating"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span><span>4.8 &middot; 12,400+ reviews</span></div>
+      <h2 class="buybox-name" id="buyboxName">Cream Soda</h2>
+      <p class="buybox-tagline" id="buyboxTagline">Prebiotic Soda &middot; 9g fiber &middot; 2g sugar &middot; 35 cal</p>
+
+      <div class="buybox-label">Choose Your Flavor</div>
+      <div class="flavor-swatches" id="flavorSwatches">
+        <button class="swatch is-active" style="background-image:url('assets/imgs/cream-soda.webp')" data-flavor="cream-soda" data-name="Cream Soda" aria-label="Cream Soda" aria-pressed="true"></button>
+        <button class="swatch" style="background-image:url('assets/imgs/vintage-cola.webp')" data-flavor="vintage-cola" data-name="Vintage Cola" aria-label="Vintage Cola" aria-pressed="false"></button>
+        <button class="swatch" style="background-image:url('assets/imgs/watermelon-lime.webp')" data-flavor="watermelon-lime" data-name="Watermelon Lime" aria-label="Watermelon Lime" aria-pressed="false"></button>
+        <button class="swatch" style="background-image:url('assets/imgs/orange-squeeze.webp')" data-flavor="orange-squeeze" data-name="Orange Squeeze" aria-label="Orange Squeeze" aria-pressed="false"></button>
+        <button class="swatch" style="background-image:url('assets/imgs/classic-grape.webp')" data-flavor="classic-grape" data-name="Classic Grape" aria-label="Classic Grape" aria-pressed="false"></button>
+        <button class="swatch" style="background-image:url('assets/imgs/strawberry-vanilla.webp')" data-flavor="strawberry-vanilla" data-name="Strawberry Vanilla" aria-label="Strawberry Vanilla" aria-pressed="false"></button>
+        <a class="swatch swatch-more" href="#" aria-label="See all 20+ flavors">+17</a>
+      </div>
+
+      <div class="buybox-label">Purchase Type</div>
+      <div class="purchase-options" id="purchaseOptions">
+        <button class="purchase-card is-active" id="subscribeCard" data-type="subscribe" data-price="3.39" aria-pressed="true">
+          <div class="purchase-card-top">
+            <span class="purchase-radio" aria-hidden="true"></span>
+            <span class="purchase-title">Subscribe &amp; Save</span>
+            <span class="save-badge">SAVE 15%</span>
+          </div>
+          <div class="purchase-price-row">
+            <span class="price-strike">$3.99</span>
+            <span class="price-now">$3.39</span>
+            <span class="price-unit">per can</span>
+          </div>
+          <select class="frequency-select" id="frequencySelect" aria-label="Delivery frequency">
+            <option>Every 2 weeks</option>
+            <option>Every 4 weeks</option>
+            <option>Every 6 weeks</option>
+          </select>
+          <div class="purchase-perks">
+            <span>&#10003; Free shipping on subscriptions</span>
+            <span>&#10003; Edit, skip, or cancel anytime</span>
+          </div>
+        </button>
+        <button class="purchase-card" id="onetimeCard" data-type="onetime" data-price="3.99" aria-pressed="false">
+          <div class="purchase-card-top">
+            <span class="purchase-radio" aria-hidden="true"></span>
+            <span class="purchase-title">One-Time Purchase</span>
+          </div>
+          <div class="purchase-price-row">
+            <span class="price-now">$3.99</span>
+            <span class="price-unit">per can</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="qty-cart-row">
+        <div class="qty-stepper">
+          <button class="qty-btn" id="qtyMinus" aria-label="Decrease quantity">&minus;</button>
+          <span class="qty-num" id="qtyNum">1</span>
+          <button class="qty-btn" id="qtyPlus" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+
+      <button class="btn-cart" id="addToCartBtn">Add to Cart &mdash; $3.39</button>
+
+      <div class="buybox-trust">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="17.5" cy="18.5" r="1.5"/></svg>Free shipping over $50</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>Cancel anytime</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Secure checkout</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="ymal">
+  <div class="ymal-header">
+    <h2 class="ymal-title">You May Also Like</h2>
+    <a class="ymal-shopall" href="#">Shop all 20+ flavors &rarr;</a>
+  </div>
+  <div class="ymal-track-wrap">
+    <div class="ymal-track" id="ymalTrack">
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--jade), var(--bottle))">
+        <img class="ymal-card-can" src="assets/imgs/vintage-cola.webp" alt="OLIPOP Vintage Cola">
+        <h3 class="ymal-card-name" style="color:var(--cream)">Vintage Cola</h3>
+        <p class="ymal-card-desc" style="color:rgba(255,246,234,.75)">Old-school cola, new-school gut. Warm vanilla and caramel, with the fizz you remember.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price" style="color:var(--cream)">$3.99</span><button class="ymal-add" aria-label="Add Vintage Cola to cart">+</button></div>
+      </div>
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--yellow), var(--vanilla))">
+        <img class="ymal-card-can" src="assets/imgs/orange-squeeze.webp" alt="OLIPOP Orange Squeeze">
+        <h3 class="ymal-card-name">Orange Squeeze</h3>
+        <p class="ymal-card-desc">Bright, sun-ripened orange with a clean citrus snap &mdash; like fresh-squeezed, minus the pulp.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price">$3.99</span><button class="ymal-add" aria-label="Add Orange Squeeze to cart">+</button></div>
+      </div>
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--mint), var(--cream))">
+        <img class="ymal-card-can" src="assets/imgs/lemon-lime.webp" alt="OLIPOP Lemon Lime">
+        <h3 class="ymal-card-name">Lemon Lime</h3>
+        <p class="ymal-card-desc">Crisp and tart, just like the classic &mdash; minus the 39 grams of regret.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price">$3.99</span><button class="ymal-add" aria-label="Add Lemon Lime to cart">+</button></div>
+      </div>
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--bottle), var(--jade))">
+        <img class="ymal-card-can" src="assets/imgs/classic-grape.webp" alt="OLIPOP Classic Grape">
+        <h3 class="ymal-card-name" style="color:var(--cream)">Classic Grape</h3>
+        <p class="ymal-card-desc" style="color:rgba(255,246,234,.75)">Deep, juicy grape with real botanical depth &mdash; the soda-fountain favorite, fixed.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price" style="color:var(--cream)">$3.99</span><button class="ymal-add" aria-label="Add Classic Grape to cart">+</button></div>
+      </div>
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--vanilla), var(--yellow))">
+        <img class="ymal-card-can" src="assets/imgs/ginger-lemon.webp" alt="OLIPOP Ginger Lemon">
+        <h3 class="ymal-card-name">Ginger Lemon</h3>
+        <p class="ymal-card-desc">Sharp ginger heat meets bright lemon zing, punchier than the soda you grew up on.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price">$3.99</span><button class="ymal-add" aria-label="Add Ginger Lemon to cart">+</button></div>
+      </div>
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--cream), var(--mint))">
+        <img class="ymal-card-can" src="assets/imgs/strawberry-vanilla.webp" alt="OLIPOP Strawberry Vanilla">
+        <h3 class="ymal-card-name">Strawberry Vanilla</h3>
+        <p class="ymal-card-desc">Sweet strawberry swirled with creamy vanilla &mdash; dessert in a can, with a snack&rsquo;s worth of sugar.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price">$3.99</span><button class="ymal-add" aria-label="Add Strawberry Vanilla to cart">+</button></div>
+      </div>
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--jade), var(--bottle))">
+        <img class="ymal-card-can" src="assets/imgs/classic-root-beer.webp" alt="OLIPOP Classic Root Beer">
+        <h3 class="ymal-card-name" style="color:var(--cream)">Classic Root Beer</h3>
+        <p class="ymal-card-desc" style="color:rgba(255,246,234,.75)">Rich sarsaparilla and warm spice, the way root beer&rsquo;s supposed to taste.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price" style="color:var(--cream)">$3.99</span><button class="ymal-add" aria-label="Add Classic Root Beer to cart">+</button></div>
+      </div>
+
+      <div class="ymal-card" style="background:linear-gradient(160deg, var(--yellow), var(--mint))">
+        <img class="ymal-card-can" src="assets/imgs/tropical-punch.webp" alt="OLIPOP Tropical Punch">
+        <h3 class="ymal-card-name">Tropical Punch</h3>
+        <p class="ymal-card-desc">Pineapple, guava, and citrus collide &mdash; poolside, in a can.</p>
+        <div class="ymal-card-cta"><span class="ymal-card-price">$3.99</span><button class="ymal-add" aria-label="Add Tropical Punch to cart">+</button></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand-col">
+      <h3 class="footer-newsletter-title">Sign up to get 15% off<br>your first order</h3>
+      <form class="footer-newsletter-form">
+        <input type="email" class="footer-email-input" placeholder="Your Email Address" aria-label="Email address" required>
+        <button type="submit" class="footer-subscribe-btn">Subscribe</button>
+      </form>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Shop</div>
+      <div class="footer-links">
+        <a href="#">All Flavors</a>
+        <a href="#">Variety Packs</a>
+        <a href="#">Subscribe &amp; Save</a>
+        <a href="#">Merch</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Learn</div>
+      <div class="footer-links">
+        <a href="#">Our Story</a>
+        <a href="#">OLISMART&reg; Technology</a>
+        <a href="#">Digestive Health</a>
+        <a href="#">FAQ</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Support</div>
+      <div class="footer-links">
+        <a href="#">Contact Us</a>
+        <a href="#">Track Order</a>
+        <a href="#">Store Locator</a>
+        <a href="#">Manage Subscription</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copyright">&copy; 2026 OLIPOP PBC. All rights reserved.</span>
+    <div class="footer-social">
+      <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg></a>
+      <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v11a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 4c0 2.5 2 4.5 4.5 4.5"/></svg></a>
+      <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M10.5 9.5l4.5 2.5-4.5 2.5z" fill="currentColor" stroke="none"/></svg></a>
+    </div>
+    <div class="footer-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Accessibility</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Header shadow once the eyebrow has scrolled past and the nav is stuck to the top.
+  var header = document.getElementById('siteHeader');
+  var sentinel = document.createElement('div');
+  sentinel.style.position = 'absolute';
+  sentinel.style.top = '0';
+  sentinel.style.height = '1px';
+  sentinel.style.width = '1px';
+  document.querySelector('.eyebrow-bar').before(sentinel);
+  new IntersectionObserver(function(entries){
+    header.classList.toggle('is-stuck', !entries[0].isIntersecting);
+  }).observe(sentinel);
+
+  // Header now lives outside .page-shell (so it can stay sticky past the hero, into
+  // the pinned benefits section too) — give page-shell exactly the remaining viewport.
+  var pageShell = document.querySelector('.page-shell');
+  function sizePageShell(){
+    pageShell.style.minHeight = 'calc(100vh - ' + header.offsetHeight + 'px)';
+  }
+  sizePageShell();
+  window.addEventListener('resize', sizePageShell);
+
+  // Pour-frame sequence crossfade (Mockly-style), stills instead of video.
+  var pourFrames = Array.prototype.slice.call(document.querySelectorAll('.pour-frame'));
+  var pourIndex = 0;
+  if(!reduceMotion && pourFrames.length > 1){
+    setInterval(function(){
+      if(document.hidden) return;
+      pourFrames[pourIndex].classList.remove('is-active');
+      pourIndex = (pourIndex + 1) % pourFrames.length;
+      pourFrames[pourIndex].classList.add('is-active');
+    }, 450);
+  }
+
+  // Badge stamp cycle: 9g fiber -> 2g sugar -> 35 calories -> loop.
+  // Each new shape stamps in on top while the previous one stays peeking behind it.
+  var badgeLayers = Array.prototype.slice.call(document.querySelectorAll('.badge-layer'));
+  var badgeIndex = 0;
+  function paintBadge(){
+    var n = badgeLayers.length;
+    badgeLayers.forEach(function(el, idx){
+      el.classList.remove('is-front', 'is-back');
+      if(idx === badgeIndex) el.classList.add('is-front');
+      else if(idx === (badgeIndex - 1 + n) % n) el.classList.add('is-back');
+    });
+  }
+  if(reduceMotion){
+    badgeLayers[0].classList.add('is-front');
+  } else if(badgeLayers.length > 1){
+    paintBadge();
+    setInterval(function(){
+      if(document.hidden) return;
+      badgeIndex = (badgeIndex + 1) % badgeLayers.length;
+      paintBadge();
+    }, 4500);
+  }
+
+  // Benefits background video: freeze on first frame under reduced motion.
+  var benefitsVideo = document.querySelector('.benefits-video');
+  if(benefitsVideo){
+    if(reduceMotion){ benefitsVideo.pause(); }
+    else { benefitsVideo.play().catch(function(){}); }
+  }
+
+  // All three cans use one shared reference height (panel 0's copy block) so they
+  // render at the same size even though panel 2 has fewer pill rows and would
+  // otherwise measure a shorter copy block.
+  var benefitsPanels = Array.prototype.slice.call(document.querySelectorAll('.benefits-content'));
+  function matchCanHeights(){
+    if(window.innerWidth <= 700){
+      benefitsPanels.forEach(function(panel){
+        var canImg = panel.querySelector('.benefits-can img');
+        if(canImg) canImg.style.height = '';
+      });
+      return;
+    }
+    var referenceCopy = benefitsPanels[0] && benefitsPanels[0].querySelector('.benefits-copy');
+    if(!referenceCopy) return;
+    var refHeight = referenceCopy.getBoundingClientRect().height;
+    benefitsPanels.forEach(function(panel){
+      var canImg = panel.querySelector('.benefits-can img');
+      if(canImg) canImg.style.height = refHeight + 'px';
+    });
+  }
+  matchCanHeights();
+  window.addEventListener('resize', matchCanHeights);
+
+  // Pinned scroll-jacking (drinkcollider.com-style): the card stays put while the
+  // wrapper scrolls through 3 viewport-heights, swapping the active content panel
+  // at each third. Disabled below 700px, where panels stack as normal static cards.
+  var pinWrapper = document.getElementById('benefitsPinWrapper');
+  var pinSection = document.getElementById('benefitsPin');
+  if(pinWrapper && pinSection && benefitsPanels.length > 1){
+    var activePanel = 0;
+    function setActivePanel(idx){
+      if(idx === activePanel) return;
+      activePanel = idx;
+      benefitsPanels.forEach(function(panel, i){
+        panel.classList.toggle('is-active', i === idx);
+      });
+    }
+    function onPinScroll(){
+      if(window.innerWidth <= 700) return;
+      var headerH = header.offsetHeight;
+      var wrapperTop = pinWrapper.offsetTop;
+      var scrollRange = pinWrapper.offsetHeight - (window.innerHeight - headerH);
+      var progress = scrollRange > 0 ? (window.scrollY - wrapperTop) / scrollRange : 0;
+      progress = Math.min(Math.max(progress, 0), 0.9999);
+      setActivePanel(Math.floor(progress * benefitsPanels.length));
+    }
+    function positionPin(){
+      pinSection.style.top = header.offsetHeight + 'px';
+      pinSection.style.height = 'calc(100vh - ' + header.offsetHeight + 'px)';
+      onPinScroll();
+    }
+    positionPin();
+    window.addEventListener('resize', positionPin);
+    window.addEventListener('scroll', onPinScroll, { passive:true });
+  }
+
+  // ── Buy Box: flavor swatches, purchase type, quantity, live price ──
+  var canImg = document.getElementById('buyboxCanImg');
+  var nameEl = document.getElementById('buyboxName');
+  var swatches = Array.prototype.slice.call(document.querySelectorAll('.swatch'));
+  swatches.forEach(function(el){
+    el.addEventListener('click', function(){
+      swatches.forEach(function(s){ s.classList.remove('is-active'); s.setAttribute('aria-pressed', 'false'); });
+      el.classList.add('is-active');
+      el.setAttribute('aria-pressed', 'true');
+      canImg.style.opacity = '0';
+      setTimeout(function(){
+        canImg.src = 'assets/imgs/' + el.dataset.flavor + '.webp';
+        canImg.alt = 'OLIPOP ' + el.dataset.name + ' can';
+        canImg.style.opacity = '1';
+      }, 160);
+      nameEl.textContent = el.dataset.name;
+    });
+  });
+
+  var purchaseCards = Array.prototype.slice.call(document.querySelectorAll('.purchase-card'));
+  var qtyNum = document.getElementById('qtyNum');
+  var addToCartBtn = document.getElementById('addToCartBtn');
+  var qty = 1;
+
+  function activePrice(){
+    var active = purchaseCards.filter(function(c){ return c.classList.contains('is-active'); })[0];
+    return active ? parseFloat(active.dataset.price) : 3.99;
+  }
+  function updateCartButton(){
+    addToCartBtn.textContent = 'Add to Cart — $' + (activePrice() * qty).toFixed(2);
+  }
+
+  purchaseCards.forEach(function(card){
+    card.addEventListener('click', function(){
+      purchaseCards.forEach(function(c){ c.classList.remove('is-active'); c.setAttribute('aria-pressed', 'false'); });
+      card.classList.add('is-active');
+      card.setAttribute('aria-pressed', 'true');
+      updateCartButton();
+    });
+  });
+
+  document.getElementById('qtyMinus').addEventListener('click', function(){
+    qty = Math.max(1, qty - 1);
+    qtyNum.textContent = qty;
+    updateCartButton();
+  });
+  document.getElementById('qtyPlus').addEventListener('click', function(){
+    qty = qty + 1;
+    qtyNum.textContent = qty;
+    updateCartButton();
+  });
+
+  var freqSelect = document.getElementById('frequencySelect');
+  if(freqSelect){
+    freqSelect.addEventListener('click', function(e){ e.stopPropagation(); });
+  }
+
+  // ── YMAL: duplicate the card set once for a seamless marquee loop, pause on hover
+  // (CSS handles the hover-pause itself), freeze entirely under reduced motion.
+  var ymalTrack = document.getElementById('ymalTrack');
+  if(ymalTrack){
+    if(reduceMotion){
+      ymalTrack.classList.add('is-paused');
+    } else {
+      var originalCards = Array.prototype.slice.call(ymalTrack.children);
+      originalCards.forEach(function(card){
+        ymalTrack.appendChild(card.cloneNode(true));
+      });
+    }
+    var cartCount = document.querySelector('.cart-count');
+    ymalTrack.addEventListener('click', function(e){
+      var btn = e.target.closest('.ymal-add');
+      if(!btn) return;
+      if(cartCount){ cartCount.textContent = String(parseInt(cartCount.textContent, 10) + 1); }
+    });
+  }
+})();
+</script>
+
+<!-- ───────────────────── FLAVOR QUIZ POPUP ───────────────────── -->
+<div class="quiz-overlay" id="quizOverlay" aria-hidden="true">
+  <div class="quiz-backdrop" data-quiz-close></div>
+  <div class="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+    <button class="quiz-close" data-quiz-close aria-label="Close">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="quiz-step is-active" data-step="pick">
+      <p class="quiz-eyebrow">20+ flavors, one for you</p>
+      <h3 class="quiz-title" id="quizTitle">What's your flavor mood?</h3>
+      <p class="quiz-sub">Pick one — we'll match a discount to it.</p>
+      <div class="quiz-grid" id="quizGrid">
+        <button class="quiz-chip" data-flavor="cream-soda" data-name="Cream Soda"><img src="assets/imgs/cream-soda.webp" alt=""><span>Cream Soda</span></button>
+        <button class="quiz-chip" data-flavor="vintage-cola" data-name="Vintage Cola"><img src="assets/imgs/vintage-cola.webp" alt=""><span>Vintage Cola</span></button>
+        <button class="quiz-chip" data-flavor="watermelon-lime" data-name="Watermelon Lime"><img src="assets/imgs/watermelon-lime.webp" alt=""><span>Watermelon Lime</span></button>
+        <button class="quiz-chip" data-flavor="orange-squeeze" data-name="Orange Squeeze"><img src="assets/imgs/orange-squeeze.webp" alt=""><span>Orange Squeeze</span></button>
+        <button class="quiz-chip" data-flavor="classic-grape" data-name="Classic Grape"><img src="assets/imgs/classic-grape.webp" alt=""><span>Classic Grape</span></button>
+        <button class="quiz-chip" data-flavor="strawberry-vanilla" data-name="Strawberry Vanilla"><img src="assets/imgs/strawberry-vanilla.webp" alt=""><span>Strawberry Vanilla</span></button>
+        <button class="quiz-chip" data-flavor="tropical-punch" data-name="Tropical Punch"><img src="assets/imgs/tropical-punch.webp" alt=""><span>Tropical Punch</span></button>
+        <button class="quiz-chip" data-flavor="ginger-lemon" data-name="Ginger Lemon"><img src="assets/imgs/ginger-lemon.webp" alt=""><span>Ginger Lemon</span></button>
+      </div>
+      <button class="quiz-surprise" data-flavor="surprise" data-name="Surprise Me" type="button">Surprise me instead &rarr;</button>
+    </div>
+
+    <div class="quiz-step" data-step="offer">
+      <div class="quiz-offer-can"><img id="quizOfferCan" src="assets/imgs/cream-soda.webp" alt=""></div>
+      <p class="quiz-eyebrow">nice pick</p>
+      <h3 class="quiz-title" id="quizOfferTitle">Nice pick — Cream Soda.</h3>
+      <p class="quiz-sub">Get 15% off your first order, matched to your flavor.</p>
+      <form class="quiz-form" id="quizEmailForm" novalidate>
+        <input class="quiz-input" type="email" id="quizEmailInput" placeholder="Your email address" aria-label="Email address" required>
+        <button class="quiz-submit" type="submit">Get 15% off</button>
+      </form>
+      <p class="quiz-fineprint">No spam — just your code and new flavors. Unsubscribe anytime.</p>
+    </div>
+
+    <div class="quiz-step" data-step="success">
+      <div class="quiz-check">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12.5l5 5L20 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3 class="quiz-title">Your code is ready.</h3>
+      <p class="quiz-sub">Sent to <strong id="quizEmailEcho"></strong> — or just grab it here:</p>
+      <div class="quiz-code">
+        <span>WELCOME15</span>
+        <button type="button" id="quizCopyBtn">Copy</button>
+      </div>
+      <button class="quiz-done" type="button" data-quiz-close>Start shopping</button>
+    </div>
+  </div>
+</div>
+
+<button class="quiz-reopen" id="quizReopen" hidden type="button">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="currentColor"/></svg>
+  Your 15% is waiting
+</button>
+
+<script>
+(function(){
+  var overlay = document.getElementById('quizOverlay');
+  var modal = overlay.querySelector('.quiz-modal');
+  var steps = Array.prototype.slice.call(overlay.querySelectorAll('.quiz-step'));
+  var reopenBtn = document.getElementById('quizReopen');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lastFocused = null;
+
+  var FLAVOR_NAMES = ['cream-soda','vintage-cola','watermelon-lime','orange-squeeze','classic-grape','strawberry-vanilla','tropical-punch','ginger-lemon'];
+  var STORAGE_KEY = 'olipopQuizCompleted';
+
+  function goToStep(name){
+    steps.forEach(function(s){ s.classList.toggle('is-active', s.dataset.step === name); });
+    if(name === 'pick'){
+      var firstChip = overlay.querySelector('.quiz-chip');
+      if(firstChip) firstChip.focus();
+    } else if(name === 'offer'){
+      var input = document.getElementById('quizEmailInput');
+      if(input) setTimeout(function(){ input.focus(); }, reduceMotion ? 0 : 320);
+    }
+  }
+
+  function openQuiz(startStep){
+    lastFocused = document.activeElement;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    reopenBtn.hidden = true;
+    goToStep(startStep || 'pick');
+    document.addEventListener('keydown', onKeydown);
+  }
+
+  function closeQuiz(){
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onKeydown);
+    if(lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    reopenBtn.hidden = false;
+  }
+
+  function onKeydown(e){
+    if(e.key === 'Escape'){ closeQuiz(); return; }
+    if(e.key !== 'Tab') return;
+    var focusable = Array.prototype.slice.call(modal.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])'))
+      .filter(function(el){ return el.offsetParent !== null; });
+    if(!focusable.length) return;
+    var first = focusable[0], last = focusable[focusable.length - 1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+
+  overlay.querySelectorAll('[data-quiz-close]').forEach(function(el){
+    el.addEventListener('click', closeQuiz);
+  });
+
+  var offerCan = document.getElementById('quizOfferCan');
+  var offerTitle = document.getElementById('quizOfferTitle');
+  overlay.querySelectorAll('.quiz-chip, .quiz-surprise').forEach(function(el){
+    el.addEventListener('click', function(){
+      var chips = overlay.querySelectorAll('.quiz-chip');
+      chips.forEach(function(c){ c.classList.remove('is-selected'); });
+      if(el.classList.contains('quiz-chip')) el.classList.add('is-selected');
+
+      var flavor = el.dataset.flavor;
+      var name = el.dataset.name;
+      if(flavor === 'surprise'){
+        flavor = FLAVOR_NAMES[Math.floor(Math.random() * FLAVOR_NAMES.length)];
+        name = overlay.querySelector('[data-flavor="' + flavor + '"] span').textContent;
+      }
+      offerCan.src = 'assets/imgs/' + flavor + '.webp';
+      offerCan.alt = 'OLIPOP ' + name + ' can';
+      offerTitle.textContent = 'Nice pick — ' + name + '.';
+      setTimeout(function(){ goToStep('offer'); }, reduceMotion ? 0 : 180);
+    });
+  });
+
+  var emailForm = document.getElementById('quizEmailForm');
+  var emailEcho = document.getElementById('quizEmailEcho');
+  emailForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var input = document.getElementById('quizEmailInput');
+    if(!input.checkValidity()){ input.focus(); return; }
+    emailEcho.textContent = input.value;
+    localStorage.setItem(STORAGE_KEY, '1');
+    goToStep('success');
+  });
+
+  var copyBtn = document.getElementById('quizCopyBtn');
+  copyBtn.addEventListener('click', function(){
+    navigator.clipboard.writeText('WELCOME15').then(function(){
+      copyBtn.textContent = 'Copied!';
+      setTimeout(function(){ copyBtn.textContent = 'Copy'; }, 1600);
+    }).catch(function(){});
+  });
+
+  reopenBtn.addEventListener('click', function(){ openQuiz('pick'); });
+
+  setTimeout(function(){ openQuiz('pick'); }, 1600);
+})();
+</script>
+
+</body>
+</html>
